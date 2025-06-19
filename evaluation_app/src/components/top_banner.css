@@ -1,0 +1,63 @@
+.top-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 80px;
+  padding: 0 20px;
+  border-bottom: 1px solid #eee;
+  background-color: #94B6D6;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-wrap: wrap; /* Allow items to wrap on small screens */
+}
+
+.banner-left {
+  flex: 1 1 70%; /* Grow and shrink, but take up to 70% of space */
+  min-width: 300px; /* Minimum width before wrapping */
+  overflow: hidden; /* Hide overflow */
+}
+
+.banner-right {
+  flex: 0 1 auto; /* Don't grow, but can shrink */
+  white-space: nowrap; /* Prevent name from breaking */
+  padding-left: 20px; /* Add some spacing */
+}
+
+.title-block {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2; /* Better line spacing */
+}
+
+.thesis-title {
+  font-style: italic;
+  font-size: 15px;
+  white-space: normal; /* Allow text to wrap */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Add ellipsis if text is too long */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-box-orient: vertical;
+}
+
+@media (max-width: 768px) {
+  .top-banner {
+    height: auto;
+    padding: 10px;
+  }
+  
+  .banner-left, .banner-right {
+    flex: 1 1 100%; /* Take full width on small screens */
+    text-align: center;
+    padding: 5px 0;
+  }
+  
+  /* .title-block {
+    line-height: 1.4;
+  } */
+  
+  .thesis-title {
+    -webkit-line-clamp: 3; /* Allow more lines on mobile */
+  }
+}

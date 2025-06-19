@@ -1,0 +1,50 @@
+.page-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin: 40px 0;
+  padding: 0 20px;
+}
+
+.nav-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.prev-button {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.next-button {
+  background-color: #add8e6; /* Light blue to match your navbar */
+  color: #333;
+}
+
+.nav-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.prev-button:hover {
+  background-color: #e0e0e0;
+}
+
+.next-button:hover {
+  background-color: #9bc4d2; /* Slightly darker blue */
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .page-navigation {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .nav-button {
+    width: 100%;
+  }
+}
