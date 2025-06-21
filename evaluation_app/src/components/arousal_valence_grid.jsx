@@ -1,14 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 
-const Axis2D = ({ onSelectPoint, width = 400, height = 400 }) => {
-  const [selectedPoint, setSelectedPoint] = useState(null);
+const Axis2D = ({ onSelectPoint, width = 400, height = 400, initialPoint = null }) => {
+  const [selectedPoint, setSelectedPoint] = useState(
+    initialPoint ? { x: Number(initialPoint.valence), y: Number(initialPoint.arousal) } : null
+  );
   const canvasRef = useRef(null);
   
   // Constants for padding and axis positioning
   const PADDING = 30; // Increased padding to accommodate axis labels
   const GRID_STEP = 0.2;
   
+  useEffect(() => {
+    if (initialPoint) {
+      setSelectedPoint({ x: Number(initialPoint.valence), y: Number(initialPoint.arousal)})
+    }
+  }, [initialPoint])
+
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -153,6 +162,10 @@ const Axis2D = ({ onSelectPoint, width = 400, height = 400 }) => {
     }
   };
 
+  const formatCoordinate = (value) => {
+    return value !== null && value !== undefined ? Number(value).toFixed(2) : '--';
+  };
+
   return (
     <Container>
       <Canvas 
@@ -165,7 +178,7 @@ const Axis2D = ({ onSelectPoint, width = 400, height = 400 }) => {
         Click anywhere on the grid to select a point.
         {selectedPoint && (
           <SelectedValue>
-            Selected: Valence={selectedPoint.x.toFixed(2)}, Arousal={selectedPoint.y.toFixed(2)}
+            Selected: Valence={formatCoordinate(selectedPoint.x)}, Arousal={formatCoordinate(selectedPoint.y)}
           </SelectedValue>
         )}
       </Instructions>

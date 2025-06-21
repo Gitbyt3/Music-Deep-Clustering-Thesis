@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageNavigation from '../components/nav_button';
 import { useSurvey } from '../contexts/SurveyContext.jsx';
 import { getNames } from 'country-list';
 
 const Demo = () => {
-  const { updateSurveyData } = useSurvey();
+  const { surveyData, updateSurveyData } = useSurvey();
   const [ formData, setFormData ] = useState({
     gender: '',
     age: '',
     occupation: '',
     nationality: ''
   })
+
+  useEffect(() => {
+    if (surveyData.Demo) {
+      setFormData(surveyData.Demo)}
+  }, [surveyData])
 
   console.log('Current form data:', formData)
 
@@ -53,15 +58,25 @@ const Demo = () => {
     setFormData({...formData, [name]: value})
   };
 
+  const isFormComplete = () => {
+    return (
+      formData.gender &&
+      formData.age &&
+      formData.occupation &&
+      formData.nationality
+    )
+  }
+
   return (
     <div>
         <div style={{paddingLeft:'40px'}}>
             <h3>Demographic Questions</h3>
             <p>This section is designed to gather basic demographic data and will not be linked to any identifiable personal data such as names, emails or phone numbers.</p>
-            
+            <p>Please fill out all the options before moving to the next page!</p>
+            <br />
             <div>
               <label>
-                Gender:
+                <strong>Gender:</strong>
                 <select name="gender" value={formData.gender} onChange={handleInputChange} style={{marginLeft: '10px'}}>
                   <option value="">Select gender</option>
                   {genders.map((gender) => (
@@ -75,7 +90,7 @@ const Demo = () => {
             <br/>
             <div>
               <label>
-                Age:
+                <strong>Age:</strong>
                 <select name="age" value={formData.age} onChange={handleInputChange} style={{marginLeft: '10px'}}>
                   <option value="">Select age range</option>
                   {ageRanges.map((range) => (
@@ -89,7 +104,7 @@ const Demo = () => {
             <br/>
             <div>
               <label>
-                Occupation:
+                <strong>Occupation:</strong>
                 <select name="occupation" value={formData.occupation} onChange={handleInputChange} style={{marginLeft: '10px'}}>
                   <option value="">Select occupation</option>
                   {occupationRanges.map((range) => (
@@ -103,7 +118,7 @@ const Demo = () => {
             <br/>
             <div>
               <label>
-                Nationality:
+                <strong>Nationality:</strong>
                 <select name="nationality" value={formData.nationality} onChange={handleInputChange} style={{marginLeft: '10px'}}>
                   <option value="">Select nationality</option>
                   {countries.map((country) => (
@@ -115,7 +130,7 @@ const Demo = () => {
               </label>
             </div>
         </div>
-        <PageNavigation onNavigate={() => updateSurveyData('Demo', formData)} />
+        <PageNavigation onNavigate={() => updateSurveyData('Demo', formData)} nextDisabled={!isFormComplete()}/>
     </div>
   )
 }

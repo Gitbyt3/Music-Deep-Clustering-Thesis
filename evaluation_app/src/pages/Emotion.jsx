@@ -5,19 +5,30 @@ import { useSurvey } from '../contexts/SurveyContext.jsx';
 const Emotion = () => {
   const { surveyData, updateSurveyData } = useSurvey();
   const [ formData, setFormData ] = useState({
-    musicImportance: '5',
+    musicImportance: 5,
     freeTime: '',
-    musicAddiction: '',
     newMusic: '',
-    internet: '',
     musicEmotion: '',
     emotionPast: '',
-    musicShivers: '',
     musicExcite: '',
     emotionTalk: ''
   })
 
-  useEffect(() => {console.log('Current survey data:', surveyData)}, []);
+  useEffect(() => {
+    if (surveyData.Emotion) {
+      setFormData(surveyData.Emotion)}
+    else {
+      setFormData({
+        musicImportance: '5',
+        freeTime: '',
+        newMusic: '',
+        musicEmotion: '',
+        emotionPast: '',
+        musicExcite: '',
+        emotionTalk: ''
+      })
+    }
+    console.log('Current survey data:', surveyData)}, [surveyData]);
   console.log('Current form data:', formData)
 
   const agreeDisagree = [
@@ -29,12 +40,24 @@ const Emotion = () => {
   ]
 
   const handleSliderChange = (e) => {
-    const value = parseInt(e.target.value)
+    const value = parseInt(e.target.value, 10)
     setFormData({...formData, musicImportance:value})
   }
 
   const handleSelection = (name, value) => {
     setFormData({...formData, [name]: value})
+  }
+
+  const isFormComplete = () => {
+    return (
+      formData.musicImportance &&
+      formData.freeTime &&
+      formData.newMusic &&
+      formData.musicEmotion &&
+      formData.emotionPast &&
+      formData.musicExcite &&
+      formData.emotionTalk
+    )
   }
 
   const buttonStyle = (name, value) => ({
@@ -70,7 +93,7 @@ const Emotion = () => {
           <p style={{fontStyle: 'italic'}}>(0 = Not important at all, 10 = Extremely important)</p>
           <div style={{display:'flex', alignItems:'center', gap:'15px'}}>
             <span style={{ width: '30px', textAlign: 'center' }}>0</span>
-            <input type="range" min="0" max="10" value={formData.musicImportance} onChange={handleSliderChange} style={{ flex:1, height:'8px'}}></input>
+            <input type="range" min="0" max="10" value={formData.musicImportance || 5} onChange={handleSliderChange} style={{ flex:1, height:'8px'}}></input>
             <span style={{ width: '30px', textAlign: 'center' }}>10</span>
           </div>
           <div style={{display:'flex', justifyContent:'center', margin:'20px 0'}}>
@@ -94,19 +117,7 @@ const Emotion = () => {
         <br/>
 
         <div>
-          <h3>3. Music is kind of an addiction to me – I couldn’t live without it.</h3>
-          <div style={buttonGroupStyle}>
-            {agreeDisagree.map((range) => (
-              <button key={range.value} onClick={() => handleSelection('musicAddiction', range.value)} style={buttonStyle('musicAddiction', range.value)}>
-                {range.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <br/>
-
-        <div>
-          <h3>4. I keep track of new music that I come across.</h3>
+          <h3>3. I keep track of new music that I come across.</h3>
           <div style={buttonGroupStyle}>
             {agreeDisagree.map((range) => (
               <button key={range.value} onClick={() => handleSelection('newMusic', range.value)} style={buttonStyle('newMusic', range.value)}>
@@ -118,19 +129,7 @@ const Emotion = () => {
         <br/>
 
         <div>
-          <h3>5. I often read or search the internet for things related to music.</h3>
-          <div style={buttonGroupStyle}>
-            {agreeDisagree.map((range) => (
-              <button key={range.value} onClick={() => handleSelection('internet', range.value)} style={buttonStyle('internet', range.value)}>
-                {range.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <br/>
-
-        <div>
-          <h3>6. Pieces of music rarely evoke emotions for me.</h3>
+          <h3>4. Pieces of music rarely evoke emotions for me.</h3>
           <div style={buttonGroupStyle}>
             {agreeDisagree.map((range) => (
               <button key={range.value} onClick={() => handleSelection('musicEmotion', range.value)} style={buttonStyle('musicEmotion', range.value)}>
@@ -142,7 +141,7 @@ const Emotion = () => {
         <br/>
 
         <div>
-          <h3>7. Music can evoke my memories of past people and places.</h3>
+          <h3>5. Music can evoke my memories of past people and places.</h3>
           <div style={buttonGroupStyle}>
             {agreeDisagree.map((range) => (
               <button key={range.value} onClick={() => handleSelection('emotionPast', range.value)} style={buttonStyle('emotionPast', range.value)}>
@@ -154,19 +153,7 @@ const Emotion = () => {
         <br/>
 
         <div>
-          <h3>8. I sometimes choose to listen to/play music that can send shivers down my spine.</h3>
-          <div style={buttonGroupStyle}>
-            {agreeDisagree.map((range) => (
-              <button key={range.value} onClick={() => handleSelection('musicShivers', range.value)} style={buttonStyle('musicShivers', range.value)}>
-                {range.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <br/>
-
-        <div>
-          <h3>9. I often pick certain music to motivate or excite me.</h3>
+          <h3>6. I often pick certain music to motivate or excite me.</h3>
           <div style={buttonGroupStyle}>
             {agreeDisagree.map((range) => (
               <button key={range.value} onClick={() => handleSelection('musicExcite', range.value)} style={buttonStyle('musicExcite', range.value)}>
@@ -178,7 +165,7 @@ const Emotion = () => {
         <br/>
 
         <div>
-          <h3>10. I am able to talk about the emotions that a piece of music evokes for me.</h3>
+          <h3>7. I am able to talk about the emotions that a piece of music evokes for me.</h3>
           <div style={buttonGroupStyle}>
             {agreeDisagree.map((range) => (
               <button key={range.value} onClick={() => handleSelection('emotionTalk', range.value)} style={buttonStyle('emotionTalk', range.value)}>
@@ -191,7 +178,7 @@ const Emotion = () => {
 
       </div>
 
-      <PageNavigation onNavigate={() => updateSurveyData('Emotion', formData)} />
+      <PageNavigation onNavigate={() => updateSurveyData('Emotion', formData)} nextDisabled={!isFormComplete()}/>
     </div>
   )
 }

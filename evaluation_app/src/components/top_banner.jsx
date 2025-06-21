@@ -6,7 +6,7 @@ const TopBanner = () => {
     <div className="top-banner">
         <div className="banner-left">
             <div className="title-block">
-                <h3 className="thesis-title">MSc Data Science & AI: Clustering Film Tracks Using Musical Features: Can Arousal-Valence Be Used to Find Songs of Similar Emotionality?</h3>
+                <h3 className="thesis-title">MSc Data Science & AI - Clustering Film Tracks Using Musical Features: Can Arousal-Valence Be Used to Find Songs of Similar Emotionality?</h3>
             </div>
         </div>
         <div className="banner-right">

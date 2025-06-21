@@ -37,6 +37,18 @@
   background-color: #9bc4d2; /* Slightly darker blue */
 }
 
+/* In your nav_button.css */
+.next-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Optional: Different style for validation vs loading disabled states */
+.next-button[disabled]:not(.is-loading) {
+  /* Style for validation disabled state */
+  border: 1px solid #ff0000;
+}
+
 /* Responsive design */
 @media (max-width: 600px) {
   .page-navigation {

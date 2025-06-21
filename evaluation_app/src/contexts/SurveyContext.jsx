@@ -8,8 +8,10 @@ export const SurveyProvider = ({ children }) => {
     Music: {},
     Emotion: {},
     Input1: {},
+    Results1: {},
     Output1: {},
     Input2: {},
+    Results2: {},
     Output2: {},
   });
 

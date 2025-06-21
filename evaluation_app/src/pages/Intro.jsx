@@ -9,8 +9,8 @@ const Intro = () => {
           <br /><br />
           <h2>Thank you for agreeing to take part in this survey and film music system evaluation!</h2>
           <br />
-          <p>This form will take approximately 15 minutes to complete and your participation is greatly appreciated. No identifiable data will be retained after the survey is complete, only the answers you put down in the next sections. This first section is a basic survey designed to gather demographic data and data related to how you experience music. Please answer the questions as accurately and honestly as possible.
-          </p>
+          <p>This form will take approximately 15 minutes to complete and your participation is greatly appreciated. No identifiable data will be retained after the survey is complete, only the answers you put down in the next sections.</p>
+          <p>The first section concerns the evaluation of the model. Details of how the model works will be described on the next page. After that is a short survey related to demographics and music listening behaviour. Please answer the questions as accurately and honestly as possible.</p>
           <p>Should you wish to back out of this survey at any point, you may simply close the browser tab and no data will be retained.</p>
           <p>Please press the next button to proceed with the survey.</p>
           <PageNavigation />

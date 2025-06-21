@@ -2,21 +2,21 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import './nav_button.css';
 import React from 'react'
 
-function PageNavigation({ onNavigate }) {
+function PageNavigation({ onNavigate, isLoading = false, nextDisabled = false }) {
   const navigate = useNavigate();
   const location = useLocation();
 
   // Define your page order
   const pageOrder = [
     '/',
-    '/demo',
-    '/music',
-    '/emotion',
     '/outline',
     '/input1',
     '/output1',
     '/input2',
     '/output2',
+    '/demo',
+    '/music',
+    '/emotion',
     '/outro'
   ];
 
@@ -26,6 +26,18 @@ function PageNavigation({ onNavigate }) {
   // Calculate next and previous paths
   const nextPage = currentIndex < pageOrder.length - 1 ? pageOrder[currentIndex + 1] : null;
   const prevPage = currentIndex > 0 ? pageOrder[currentIndex - 1] : null;
+
+  const handleNextClick = async () => {
+    try {
+      if (onNavigate) {
+        await onNavigate()
+      }
+      navigate(nextPage)
+    }
+    catch (error) {
+      console.error('Navigation failed', error)
+    }
+  }
 
   return (
     <div className="page-navigation">
@@ -40,12 +52,11 @@ function PageNavigation({ onNavigate }) {
       
       {nextPage && (
         <button 
-          onClick={() => {
-            if (onNavigate) onNavigate();
-            navigate(nextPage)}}
+          onClick={handleNextClick}
           className="nav-button next-button"
+          disabled={isLoading || nextDisabled}
         >
-          Next Page →
+          {isLoading ? 'Loading...' : 'Next Page →'}
         </button>
       )}
     </div>

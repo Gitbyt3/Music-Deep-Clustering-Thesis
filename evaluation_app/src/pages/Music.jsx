@@ -10,13 +10,14 @@ const Music = () => {
     musicPractice: '',
     goodSinger: '',
     songMistakes: '',
-    songComparison: '',
     beatRecognition: '',
     tuneRecognition: '',
-    musician: '',
   })
   
-  useEffect(() => {console.log('Current survey data:', surveyData)}, []);
+  useEffect(() => {
+    if (surveyData.Music) {
+      setFormData(surveyData.Music)}
+    console.log('Current survey data:', surveyData)}, []);
   console.log('Current form data:', formData)
 
   const minuteRanges = [
@@ -47,6 +48,18 @@ const Music = () => {
 
   const handleSelection = (name, value) => {
     setFormData({...formData, [name]: value})
+  }
+
+  const isFormComplete = () => {
+    return (
+      formData.musicAttentive &&
+      formData.musicCasual &&
+      formData.musicPractice &&
+      formData.goodSinger &&
+      formData.songMistakes &&
+      formData.beatRecognition &&
+      formData.tuneRecognition
+    )
   }
 
   const buttonStyle = (name, value) => ({
@@ -140,19 +153,7 @@ const Music = () => {
         <br/>
 
         <div>
-          <h3>6. I can compare and discuss differences between two performances or versions of the same piece of music.</h3>
-          <div style={buttonGroupStyle}>
-            {agreeDisagree.map((range) => (
-              <button key={range.value} onClick={() => handleSelection('songComparison', range.value)} style={buttonStyle('songComparison', range.value)}>
-                {range.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <br/>
-
-        <div>
-          <h3>7. I can tell when people sing or play out of time to the beat.</h3>
+          <h3>6. I can tell when people sing or play out of time to the beat.</h3>
           <div style={buttonGroupStyle}>
             {agreeDisagree.map((range) => (
               <button key={range.value} onClick={() => handleSelection('beatRecognition', range.value)} style={buttonStyle('beatRecognition', range.value)}>
@@ -164,7 +165,7 @@ const Music = () => {
         <br/>
 
         <div>
-          <h3>8. I can tell when people sing or play out of tune.</h3>
+          <h3>7. I can tell when people sing or play out of tune.</h3>
           <div style={buttonGroupStyle}>
             {agreeDisagree.map((range) => (
               <button key={range.value} onClick={() => handleSelection('tuneRecognition', range.value)} style={buttonStyle('tuneRecognition', range.value)}>
@@ -175,20 +176,10 @@ const Music = () => {
         </div>
         <br/>
 
-        <div>
-          <h3>9. I would consider myself a musician.</h3>
-          <div style={buttonGroupStyle}>
-            {agreeDisagree.map((range) => (
-              <button key={range.value} onClick={() => handleSelection('musician', range.value)} style={buttonStyle('musician', range.value)}>
-                {range.label}
-              </button>
-            ))}
-          </div>
-        </div>
         <br/>
       </div>
 
-      <PageNavigation onNavigate={() => updateSurveyData('Music', formData)} />
+      <PageNavigation onNavigate={() => updateSurveyData('Music', formData)} nextDisabled={!isFormComplete()}/>
     </div>
   )
 }

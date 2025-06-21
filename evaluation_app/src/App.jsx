@@ -27,7 +27,6 @@ const App = () => {
         <Route path='music' element={<Music />} />
         <Route path='emotion' element={<Emotion />} />
         <Route path='outline' element={<Outline />} />
-        
         <Route path='input1' element={<Input1 />} />
         <Route path='output1' element={<Output1 />} />
         <Route path='input2' element={<Input2 />} />
