@@ -11,7 +11,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 cred = credentials.Certificate(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
-initialize_app(cred, {'storageBucket':"FIREBASE_STORAGE_BUCKET"})
+initialize_app(cred, {'storageBucket':os.getenv("FIREBASE_STORAGE_BUCKET")})
 db, bucket = firestore.client(), storage.bucket()
 
 def get_all_clusters():
