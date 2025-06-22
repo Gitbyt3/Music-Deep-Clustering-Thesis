@@ -35,7 +35,7 @@ const Input2 = () => {
     setError(null)
 
     try {
-      const response = await axios.post('http://localhost:5000/api/find-tracks',
+      const response = await axios.post('https://music-deep-clustering-thesis.onrender.com/api/find-tracks',
         {arousal: formData.arousal, valence: formData.valence},
         {headers: {'Content-Type':'application/json'}})
         
