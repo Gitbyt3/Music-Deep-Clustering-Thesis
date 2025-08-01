@@ -107,10 +107,21 @@ def retrieve_tracks():
         for fn in retrieved_filenames:
             if fn in track_dict:
                 tracks_retrieved.append(track_dict[fn])
+
+        debug_info = {
+            'input':(input_arousal, input_valence),
+            'retrieved_filenames':retrieved_filenames,
+            'firestore_data':track_dict
+        }
+
+        if len(tracks_retrieved) == 0:
+            return jsonify({'status':'debug', 'data':debug_info})
+
         return jsonify({'status':'success', 'tracks':tracks_retrieved})
 
     except Exception as e:
         return jsonify({'status':'error', 'message':str(e)}), 500
 
 if __name__ == "__main__":
+    # app.run(debug=True)
     serve(app, host="0.0.0.0", port=8080)
