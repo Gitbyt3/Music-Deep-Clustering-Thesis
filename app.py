@@ -48,7 +48,7 @@ def download_files():
         from model import VaDE
         global model
         model = VaDE(input_dim=640, hidden_dims=[512, 256, 128], latent_dim=32, n_clusters=6)
-        model.load_state_dict(torch.load(downloaded_files['model_weights.pt'], map_location='cpu'))
+        model.load_state_dict(torch.load(downloaded_files['model_weights.pt'], map_location=torch.device('cpu')))
         model.to('cpu')
         model.eval()
 
