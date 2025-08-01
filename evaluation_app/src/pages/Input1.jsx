@@ -13,9 +13,24 @@ const Input1 = () => {
   })
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get('https://music-deep-clustering-thesis.onrender.com/api/download-files');
+        console.log('Files downloaded:', response.data)
+      } catch (err) {
+        console.error('Error downloading files:', err);
+        setError(err.response?.data?.message || 'Failed to download files')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     if (surveyData.Input1) {
       setFormData(surveyData.Input1)}
-    console.log('Current survey data:', surveyData)}, []);
+    console.log('Current survey data:', surveyData)
+    fetchData()
+  }, []);
   
   console.log('Current form data:', formData)
 
@@ -37,7 +52,7 @@ const Input1 = () => {
     setError(null)
 
     try {
-      const response = await axios.post('https://music-deep-clustering-thesis.onrender.com/api/find-tracks',
+      const response = await axios.post('https://music-deep-clustering-thesis.onrender.com/api/get-tracks',
         {arousal: formData.arousal, valence: formData.valence},
         {headers: {'Content-Type':'application/json'}})
         

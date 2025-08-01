@@ -1,7 +1,6 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request
 from firebase_admin import credentials, firestore, storage, initialize_app
 from google.cloud.firestore_v1.base_query import FieldFilter
-import pandas as pd
 import torch
 import torch.nn.functional as F
 from flask_cors import CORS
