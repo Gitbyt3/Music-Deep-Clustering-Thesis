@@ -99,8 +99,10 @@ def retrieve_tracks():
         audio_projections['cluster_ids'] = audio_projections['cluster_ids'].cpu()
 
         retrieved_filenames = retrieve_k_closest((input_arousal, input_valence), audio_projections, ids, audio_dict, model)
+        print(f'Retrieved filenames: {retrieved_filenames}')
         tracks_ref = db.collection('audio_tracks_unique').where(filter=FieldFilter('audio.filename', 'in', retrieved_filenames))
         track_dict = {track.id: track.to_dict() for track in tracks_ref.stream()}
+        print(f'Firestore track_dict: {track_dict}')
         tracks_retrieved = []
         for fn in retrieved_filenames:
             if fn in track_dict:
