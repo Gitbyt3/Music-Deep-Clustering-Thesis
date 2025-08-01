@@ -11,7 +11,6 @@ import pickle
 from dotenv import load_dotenv
 from waitress import serve
 import tempfile
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 load_dotenv()
 app = Flask(__name__)
@@ -49,8 +48,8 @@ def download_files():
         from model import VaDE
         global model
         model = VaDE(input_dim=640, hidden_dims=[512, 256, 128], latent_dim=32, n_clusters=6)
-        model.load_state_dict(torch.load(downloaded_files['model_weights.pt'], map_location=device))
-        model.to(device)
+        model.load_state_dict(torch.load(downloaded_files['model_weights.pt'], map_location='cpu'))
+        model.to('cpu')
         model.eval()
 
         return jsonify({'status':'success', 'message':'Files Downloaded, Model Loaded', 'files':list(files.keys())})
@@ -58,9 +57,9 @@ def download_files():
     except Exception as e:
         return jsonify({'status':'error', 'message':str(e)}), 500
 
-def retrieve_k_closest(AV_query, database, ids, audio_dict, model, device, k=5):
+def retrieve_k_closest(AV_query, database, ids, audio_dict, model, k=5):
     with torch.no_grad():
-        query_tensor = torch.tensor(AV_query, dtype=torch.float32).to(device).unsqueeze(0)
+        query_tensor = torch.tensor(AV_query, dtype=torch.float32).unsqueeze(0)
         query_projected = model.projector(model.av_encoder(query_tensor))
 
     query_projected = F.normalize(query_projected, p=2, dim=1)
@@ -96,11 +95,12 @@ def retrieve_tracks():
         with open(downloaded_files['ids.pkl'], 'rb') as f:
             ids = pickle.load(f)
 
-        retrieved_filenames = retrieve_k_closest((input_arousal, input_valence), audio_projections, ids, audio_dict, model, device)
-        print(retrieved_filenames)
+        audio_projections['projected_audio'] = audio_projections['projected_audio'].cpu()
+        audio_projections['cluster_ids'] = audio_projections['cluster_ids'].cpu()
+
+        retrieved_filenames = retrieve_k_closest((input_arousal, input_valence), audio_projections, ids, audio_dict, model)
         tracks_ref = db.collection('audio_tracks_unique').where(filter=FieldFilter('audio.filename', 'in', retrieved_filenames))
         track_dict = {track.id: track.to_dict() for track in tracks_ref.stream()}
-        print(track_dict)
         tracks_retrieved = []
         for fn in retrieved_filenames:
             if fn in track_dict:
