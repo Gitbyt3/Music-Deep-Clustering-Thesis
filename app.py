@@ -1,11 +1,18 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from firebase_admin import credentials, firestore, storage, initialize_app
 from google.cloud.firestore_v1.base_query import FieldFilter
-import numpy as np
+import pandas as pd
+import torch
+import torch.nn.functional as F
 from flask_cors import CORS
 import os
+import importlib.util
+import sys
+import pickle
 from dotenv import load_dotenv
 from waitress import serve
+import tempfile
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 load_dotenv()
 app = Flask(__name__)
@@ -14,39 +21,95 @@ cred = credentials.Certificate(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 initialize_app(cred, {'storageBucket':os.getenv("FIREBASE_STORAGE_BUCKET")})
 db, bucket = firestore.client(), storage.bucket()
 
-def get_all_clusters():
-    clusters_ref = db.collection('clusters')
-    cluster_data = {int(doc.id): doc.to_dict() for doc in clusters_ref.stream()}
-    sorted_cluster_data = sorted(cluster_data.items(), key=lambda i: i[0])
-    cluster_array = np.array([[cluster[1]['median_arousal'], cluster[1]['median_valence']] for cluster in sorted_cluster_data])
-    return cluster_array
+downloaded_files = {}
+model = None
 
-@app.route('/api/find-tracks', methods=['POST'])
-def find_tracks():
+@app.route('/api/download-files', methods=['GET'])
+def download_files():
+    try:
+        files = {
+            'audio_dict.pkl':'mvp_2_files/audio_dict.pkl',
+            'audio_projections.pkl':'mvp_2_files/audio_projections.pkl',
+            'ids.pkl':'mvp_2_files/ids.pkl',
+            'model_weights.pt':'mvp_2_files/model_weights.pt',
+            'model.py':'mvp_2_files/model.py'
+        }
+        temp_dir = tempfile.mkdtemp()
+
+        for filename, path in files.items():
+            blob = bucket.blob(path)
+            temp_path = os.path.join(temp_dir, filename)
+            blob.download_to_filename(temp_path)
+            downloaded_files[filename] = temp_path
+
+        spec = importlib.util.spec_from_file_location('model', downloaded_files['model.py'])
+        model_module = importlib.util.module_from_spec(spec)
+        sys.modules['model'] = model_module
+        spec.loader.exec_module(model_module)
+
+        from model import VaDE
+        global model
+        model = VaDE(input_dim=640, hidden_dims=[512, 256, 128], latent_dim=32, n_clusters=6)
+        model.load_state_dict(torch.load(downloaded_files['model_weights.pt'], map_location=device))
+        model.to(device)
+        model.eval()
+
+        return jsonify({'status':'success', 'message':'Files Downloaded, Model Loaded', 'files':list(files.keys())})
+
+    except Exception as e:
+        return jsonify({'status':'error', 'message':str(e)}), 500
+
+def retrieve_k_closest(AV_query, database, ids, audio_dict, model, device, k=5):
+    with torch.no_grad():
+        query_tensor = torch.tensor(AV_query, dtype=torch.float32).to(device).unsqueeze(0)
+        query_projected = model.projector(model.av_encoder(query_tensor))
+
+    query_projected = F.normalize(query_projected, p=2, dim=1)
+    database['projected_audio'] = F.normalize(database['projected_audio'], p=2, dim=1)
+
+    similarities = torch.mm(query_projected, database['projected_audio'].T)
+    topk_similarity, topk_indices = torch.topk(similarities.squeeze(), k=k+20)
+    topk_similarity = topk_similarity.tolist()
+    topk_clusters = database['cluster_ids'][topk_indices].tolist()
+    topk_ids = [ids[index] for index in topk_indices.tolist()]
+
+    unique_ids, unique_similarities, unique_clusters = [], [], []
+    for sim, id, cluster in zip(topk_similarity, topk_ids, topk_clusters):
+        if id not in unique_ids:
+            unique_ids.append(id), unique_similarities.append(sim), unique_clusters.append(cluster)
+            if len(unique_ids) == k:
+                break
+
+    unique_filenames = [os.path.basename(audio_dict[id]) for id in unique_ids]
+    return unique_filenames
+
+@app.route('/api/get-tracks', methods=['POST'])
+def retrieve_tracks():
     try:
         data = request.json
         input_arousal, input_valence = float(data['arousal']), float(data['valence'])
         if abs(input_arousal) > 1 or abs(input_valence) > 1: raise ValueError('Arousal/Valence must be between -1 and +1')
 
-        clusters = get_all_clusters()
-        input_score = np.array([input_arousal, input_valence])
-        closest_centroid = np.argmin(np.linalg.norm(clusters - input_score, axis=1))
+        with open(downloaded_files['audio_dict.pkl'], 'rb') as f:
+            audio_dict = pickle.load(f)
+        with open(downloaded_files['audio_projections.pkl'], 'rb') as f:
+            audio_projections = pickle.load(f)
+        with open(downloaded_files['ids.pkl'], 'rb') as f:
+            ids = pickle.load(f)
 
-        tracks_ref = db.collection('audio_tracks').where(filter=FieldFilter('cluster_id', '==', str(closest_centroid))).order_by('dist_to_centroid').limit(5)
-        tracks_retrieved = [track.to_dict() for track in tracks_ref.stream()]
-        
-        return jsonify({
-            'status':'success',
-            'closest_centroid':str(closest_centroid),
-            'tracks':tracks_retrieved
-        })
-    
+        retrieved_filenames = retrieve_k_closest((input_arousal, input_valence), audio_projections, ids, audio_dict, model, device)
+        print(retrieved_filenames)
+        tracks_ref = db.collection('audio_tracks_unique').where(filter=FieldFilter('audio.filename', 'in', retrieved_filenames))
+        track_dict = {track.id: track.to_dict() for track in tracks_ref.stream()}
+        print(track_dict)
+        tracks_retrieved = []
+        for fn in retrieved_filenames:
+            if fn in track_dict:
+                tracks_retrieved.append(track_dict[fn])
+        return jsonify({'status':'success', 'tracks':tracks_retrieved})
+
     except Exception as e:
-        return jsonify({
-            'status':'error',
-            'message':str(e)
-        }), 400
-
+        return jsonify({'status':'error', 'message':str(e)}), 500
 
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=8080)
