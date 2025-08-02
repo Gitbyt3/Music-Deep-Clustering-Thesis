@@ -78,7 +78,7 @@ def retrieve_k_closest(AV_query, database, ids, audio_dict, model, k=5):
             if len(unique_ids) == k:
                 break
 
-    unique_filenames = [os.path.basename(audio_dict[id]) for id in unique_ids]
+    unique_filenames = [audio_dict[id] for id in unique_ids]
     return unique_filenames
 
 @app.route('/api/get-tracks', methods=['POST'])
@@ -99,8 +99,7 @@ def retrieve_tracks():
         audio_projections['cluster_ids'] = audio_projections['cluster_ids'].cpu()
 
         retrieved_filenames = retrieve_k_closest((input_arousal, input_valence), audio_projections, ids, audio_dict, model)
-        retrieved_filenames = [os.path.basename(filename) for filename in retrieved_filenames]
-        
+
         tracks_ref = db.collection('audio_tracks_unique').where(filter=FieldFilter('audio.filename', 'in', retrieved_filenames))
         track_dict = {track.id: track.to_dict() for track in tracks_ref.stream()}
         tracks_retrieved = []
